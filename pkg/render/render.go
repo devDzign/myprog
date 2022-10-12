@@ -6,26 +6,35 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"webHello/pkg/config"
 )
+
+var functions = template.FuncMap{}
+
+var app *config.AppConfig
+
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
 
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
-	// create a template cache
-
-	cache, err := createTemplateCache()
-	if err != nil {
-		log.Fatal(err)
+	var tc map[string]*template.Template
+	if app.UseCache {
+		// create template cache tc
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
 
-	// get requested templete from cache
-	t, ok := cache[tmpl]
+	t, ok := tc[tmpl]
 
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("Could not get template from template cache")
 	}
 
 	buf := new(bytes.Buffer)
-	err = t.Execute(buf, nil)
+	err := t.Execute(buf, nil)
 
 	if err != nil {
 		log.Fatal(err)
@@ -40,37 +49,30 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
-	//myCache := make(map[string]*template.Template) same as 40
+// CreateTemplateCache creates a template cache as a map
+func CreateTemplateCache() (map[string]*template.Template, error) {
+
 	myCache := map[string]*template.Template{}
 
-	// get all the files named *.page.html from ./templates
-
 	pages, err := filepath.Glob("./templates/*.page.html")
-
 	if err != nil {
 		return myCache, err
 	}
 
-	// range through all file ending with *.page.html
-
 	for _, page := range pages {
 		name := filepath.Base(page)
-
-		ts, err := template.New(name).ParseFiles(page)
-
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
 		}
 
 		matches, err := filepath.Glob("./templates/*.go.html")
-
 		if err != nil {
 			return myCache, err
 		}
 
 		if len(matches) > 0 {
-			ts, err = ts.ParseGlob("./templates/*go.html")
+			ts, err = ts.ParseGlob("./templates/*.go.html")
 			if err != nil {
 				return myCache, err
 			}
