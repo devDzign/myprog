@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"webHello/pkg/config"
+	"webHello/pkg/models"
 	"webHello/pkg/render"
 )
 
@@ -10,18 +11,6 @@ var Repo *Repository
 
 type Repository struct {
 	App *config.AppConfig
-}
-
-// TemplateData holds data sent from handlers to templates
-type TemplateData struct {
-	StringMap map[string]string
-	IntMap    map[string]int
-	FloatMap  map[string]float32
-	Data      map[string]interface{}
-	CRFToken  string
-	Flash     string
-	Warning   string
-	Error     string
 }
 
 // NewRepo creates a new repositories
@@ -38,11 +27,11 @@ func NewHandlers(r *Repository) {
 }
 
 func (m *Repository) Home(w http.ResponseWriter, request *http.Request) {
-	render.RenderTemplate(w, "home.page.html", &TemplateData{})
+	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) About(w http.ResponseWriter, request *http.Request) {
-	var stringMap map[string]string
+	stringMap := make(map[string]string)
 	stringMap["test"] = "Hello, again."
-	render.RenderTemplate(w, "about.page.html", &TemplateData{StringMap: stringMap})
+	render.RenderTemplate(w, "about.page.html", &models.TemplateData{StringMap: stringMap})
 }

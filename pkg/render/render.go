@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"webHello/pkg/config"
-	"webHello/pkg/handlers"
+	"webHello/pkg/models"
 )
 
 var functions = template.FuncMap{}
@@ -18,7 +18,12 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string, td *handlers.TemplateData) {
+func AdddefaultData(data *models.TemplateData) *models.TemplateData {
+
+	return data
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 
 	var tc map[string]*template.Template
 	if app.UseCache {
@@ -35,6 +40,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, td *handlers.TemplateDat
 	}
 
 	buf := new(bytes.Buffer)
+
+	td = AdddefaultData(td)
 	err := t.Execute(buf, td)
 
 	if err != nil {
