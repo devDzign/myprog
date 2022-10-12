@@ -12,6 +12,7 @@ import (
 )
 
 const portNumber = ":8080"
+const environment = "dev"
 
 var app config.AppConfig
 var session *scs.SessionManager
@@ -20,6 +21,7 @@ var session *scs.SessionManager
 func main() {
 	// change this to true when in production
 	app.InProduction = false
+	app.Env = environment
 
 	// set up the session
 	session = scs.New()
